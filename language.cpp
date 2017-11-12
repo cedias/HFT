@@ -568,36 +568,40 @@ int main(int argc, char** argv)
 {
   srand(0);
 
-  if (argc < 2)
+  if (argc < 3)
   {
-    printf("An input file is required\n");
+    printf("An input file is required and a split number is required\n");
     exit(0);
   }
+
 
   double latentReg = 0;
   double lambda = 0.1;
   int K = 5;
+  int split = atoi(argv[2]);
   char* modelPath = "model.out";
   char* predictionPath = "predictions.out";
 
-  if (argc == 7)
-  {
-    latentReg = atof(argv[2]);
-    lambda = atof(argv[3]);
-    K = atoi(argv[4]);
-    modelPath = argv[5];
-    predictionPath = argv[6];
-  }
+  //TODO: Properly add each arguments
+  // if (argc == 7)
+  // {
+  //   latentReg = atof(argv[2]);
+  //   lambda = atof(argv[3]);
+  //   K = atoi(argv[4]);
+  //   modelPath = argv[5];
+  //   predictionPath = argv[6];
+  // }
 
-  printf("corpus = %s\n", argv[1]);
+  printf("corpus = %s  (split %d)\n", argv[1],split);
   printf("latentReg = %f\n", latentReg);
   printf("lambda = %f\n", lambda);
   printf("K = %d\n", K);
 
-  corpus corp(argv[1], 0);
+  corpus corp(argv[1], 0, split);
   topicCorpus ec(&corp, K, // K
                  latentReg, // latent topic regularizer
-                 lambda); // lambda
+                 lambda, // lambda
+                 split);
   ec.train(50, 50);
   ec.save(modelPath, predictionPath);
 

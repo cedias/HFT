@@ -36,6 +36,7 @@ struct vote
   int user; // ID of the user
   int item; // ID of the item
   float value; // Rating
+  int split; // split number
 
   int voteTime; // Unix-time of the rating
   std::vector<int> words; // IDs of the words in the review
@@ -64,7 +65,7 @@ template<typename T> int sgn(T val)
 class corpus
 {
 public:
-  corpus(std::string voteFile, int max)
+  corpus(std::string voteFile, int max, int split)
   {
     std::map<std::string, int> uCounts;
     std::map<std::string, int> bCounts;
@@ -75,6 +76,7 @@ public:
     int voteTime;
     int nw;
     int nRead = 0;
+    //int testSplit = 0;
 
     std::fstream in;
     //igzstream in;
@@ -86,7 +88,12 @@ public:
     while (std::getline(in, line))
     {
       std::stringstream ss(line);
-      ss >> uName >> bName >> value >> voteTime >> nw;
+      ss >> uName >> bName >> value >> splitNum >> voteTime >> nw;
+
+      if (splitNum == split){
+        this->nbTest++;
+      }
+
       if (value > 5 or value < 0)
       { // Ratings should be in the range [0,5]
         printf("Got bad value of %f\nOther fields were %s %s %d\n", value, uName.c_str(), bName.c_str(), voteTime);
@@ -167,7 +174,7 @@ public:
     while (std::getline(in2, line))
     {
       std::stringstream ss(line);
-      ss >> uName >> bName >> value >> voteTime >> nw;
+      ss >> uName >> bName >> value >> splitNum >> voteTime >> nw;
 
       for (int w = 0; w < nw; w++)
       {
@@ -202,6 +209,7 @@ public:
 
       v->value = value;
       v->voteTime = voteTime;
+      v->split = splitNum;
 
       V->push_back(v);
       v = new vote();
@@ -216,7 +224,7 @@ public:
       if (max > 0 and (int) nRead >= max)
         break;
     }
-
+    printf("testSplit num = %d\n",this->nbTest );
     printf("\n");
     delete v;
 
@@ -235,6 +243,8 @@ public:
   int nUsers; // Number of users
   int nBeers; // Number of items
   int nWords; // Number of words
+  int nbTest = 0;
+  int splitNum;
 
   std::map<std::string, int> userIds; // Maps a user's string-valued ID to an integer
   std::map<std::string, int> beerIds; // Maps an item's string-valued ID to an integer

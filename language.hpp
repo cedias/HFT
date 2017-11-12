@@ -6,8 +6,9 @@ public:
   topicCorpus(corpus* corp, // The corpus
               int K, // The number of latent factors
               double latentReg, // Parameter regularizer used by the "standard" recommender system
-              double lambda) : // Word regularizer used by HFT
-    corp(corp), K(K), latentReg(latentReg), lambda(lambda)
+              double lambda,  // Word regularizer used by HFT
+              int split) :
+    corp(corp), K(K), latentReg(latentReg), lambda(lambda), split(split)
   {
     srand(0);
 
@@ -34,26 +35,30 @@ public:
       }
 
     double trainFraction = 0.8;
-    double testFraction = 0.1;
-    double train_index = 0;
+    double testFraction = 0.5;
+    double test_index = 0;
+    int splitNum = this->split;
+
     for (std::vector<vote*>::iterator it = corp->V->begin(); it != corp->V->end(); it ++)
     {
-      train_index++;
-      double r = train_index / corp->V->size();
-      if (r < trainFraction)
+      
+      if ( (*it)->split != this->split)
       {
         trainVotes.push_back(*it);
         trainVotesPerUser[(*it)->user].push_back(*it);
         trainVotesPerBeer[(*it)->item].push_back(*it);
+
         if (nTrainingPerUser.find((*it)->user) == nTrainingPerUser.end())
           nTrainingPerUser[(*it)->user] = 0;
+
         if (nTrainingPerBeer.find((*it)->item) == nTrainingPerBeer.end())
           nTrainingPerBeer[(*it)->item] = 0;
         nTrainingPerUser[(*it)->user] ++;
         nTrainingPerBeer[(*it)->item] ++;
       }
-      else if (r < (testFraction + trainFraction))
+      else if (test_index/corp->nbTest <= testFraction)
       {
+        test_index ++;
         validVotes.push_back(*it);
       }
       else
@@ -301,6 +306,7 @@ public:
 
   int NW;
   int K;
+  int split;
 
   double latentReg;
   double lambda;
