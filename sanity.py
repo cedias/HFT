@@ -1,6 +1,7 @@
 import pickle as pkl
 import sys
 from tqdm import tqdm
+import math
 
 def train_val_test(datatuples,splits,split_num=0,validation=0.5,rows=None):
     """
@@ -60,7 +61,7 @@ def means(data,train,test):
     print(f"Train mean {mean}")
 
     mse_mean = [ (int(data[idx][3])-mean)**2 for idx in test]
-    print(f"error -> only mean {sum(mse_mean)/len(mse_mean)}")
+    print(f"error -> only mean {math.sqrt(sum(mse_mean)/len(mse_mean))}")
 
     mean_u_i = {}
 
@@ -75,7 +76,7 @@ def means(data,train,test):
     pred_func = lambda tuple: mean + mean_u_i.get(tuple[0],0) + mean_u_i.get(tuple[1],0) 
 
     mse_mean = [ (int(data[idx][3]) - pred_func(data[idx]))**2 for idx in test]
-    print(f"error -> mean + udiff + idiff {sum(mse_mean)/len(mse_mean)}")    
+    print(f"error -> mean + udiff + idiff {math.sqrt(sum(mse_mean)/len(mse_mean))}")    
     
 
 
@@ -84,3 +85,4 @@ split = int(sys.argv[-1])
 print(split)
 data_tl,(trainit,valit,testit) = train_val_test(datadict["data"],datadict["splits"],int(split),validation=0.5,rows=datadict["rows"])
 means(data_tl,trainit,testit)
+#print(datadict["splits"][:20]) ##Checked splits order seems ok
